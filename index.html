@@ -3,879 +3,920 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดเก็บข้อมูลกำลังพล</title>
+    <title>CRMA42 Directory - ทำเนียบรุ่น</title>
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.7/css/dataTables.tailwindcss.css">
-    <script src="https://cdn.datatables.net/2.0.7/js/dataTables.js"></script>
-    <script src="https://cdn.datatables.net/2.0.7/js/dataTables.tailwindcss.js"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Thai Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+
     <style>
         body {
-            font-family: 'Sarabun', 'Inter', sans-serif;
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .military-gradient {
+            background: linear-gradient(135deg, #1a4d2e 0%, #2f5f42 100%);
+        }
+        .crma-gold {
+            color: #d4af37;
+        }
+        .crma-bg-gold {
+            background-color: #d4af37;
+        }
+        /* Hide spin button for number input */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
         }
 
-        /* --- [START] Modern DataTables Styles --- */
-
-        /* ปรับปรุงสไตล์ของ 'Show entries' select box */
-        .dataTables_wrapper .dataTables_length select {
-            border-radius: 0.375rem; /* rounded-md */
-            border: 1px solid #d1d5db; /* border-gray-300 */
-            padding: 0.5rem 2rem 0.5rem 0.75rem; 
-            background-color: white; /* bg-white */
-            font-size: 0.875rem; /* text-sm */
-        }
-        
-        /* ปรับปรุงสไตล์ของ 'Showing X to Y' info text */
-        .dataTables_info {
-             font-size: 0.875rem; /* text-sm */
-             color: #4b5563; /* text-gray-600 */
-             padding-top: 0.5rem; /* เพิ่ม padding เพื่อจัดแนวให้สวยงาม */
-        }
-        
-        /* ปรับปรุงสไตล์ปุ่ม Pagination (ตัวเลขหน้า) */
-        .dt-paging .dt-paging-button {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            height: 2.25rem; /* h-9 */
-            width: 2.25rem; /* w-9 */
-            border-radius: 0.375rem; /* rounded-md */
-            border: 1px solid #d1d5db; /* border-gray-300 */
-            background-color: white;
-            color: #374151; /* text-gray-700 */
-            margin-left: 0.25rem;
-            transition: all 0.2s ease-in-out;
-            font-size: 0.875rem;
-        }
-        
-        /* เอฟเฟกต์ Hover ของปุ่ม Pagination */
-        .dt-paging .dt-paging-button:hover {
-             background-color: #f9fafb; /* bg-gray-50 */
-             border-color: #9ca3af; /* border-gray-400 */
-        }
-
-        /* สไตล์ปุ่ม Pagination ที่ถูกเลือก (Current) */
-        .dt-paging .dt-paging-button.current,
-        .dt-paging .dt-paging-button.current:hover {
-            background-color: #2563eb; /* bg-blue-600 */
-            color: white;
-            border-color: #2563eb; /* border-blue-600 */
-            font-weight: 600;
-        }
-
-        /* สไตล์ปุ่ม Pagination ที่ถูกปิดใช้งาน (Disabled) */
-        .dt-paging .dt-paging-button.disabled,
-        .dt-paging .dt-paging-button.disabled:hover {
-            background-color: #f9fafb; /* bg-gray-50 */
-            color: #9ca3af; /* text-gray-400 */
-            border-color: #e5e7eb; /* border-gray-200 */
-            cursor: not-allowed;
-        }
-
-        /* ปรับปรุงสไตล์ของตาราง (Header) */
-         #personnel-table thead th {
-             padding: 0.75rem 1.5rem; /* py-3 px-6 */
-             vertical-align: middle;
-             /* คลาสสีและตัวอักษรถูกกำหนดไว้ใน HTML (bg-gray-50, etc.) */
-         }
-
-        /* ปรับปรุงสไตล์ของตาราง (Body) */
-        #personnel-table tbody tr {
-            border-bottom: 1px solid #e5e7eb; /* border-b border-gray-200 */
-        }
-
-        /* เอฟเฟกต์ Hover ของแถวในตาราง */
-        #personnel-table tbody tr:hover {
-            background-color: #f9fafb; /* bg-gray-50 */
-        }
-        
-        /* ปรับปรุงสไตล์ของเซลล์ในตาราง (Body) */
-        #personnel-table tbody td {
-            padding: 1rem 1.5rem; /* py-4 px-6 */
-            white-space: nowrap;
-            font-size: 0.875rem; /* text-sm */
-            color: #374151; /* text-gray-700 */
-            vertical-align: middle; /* จัดให้เนื้อหาอยู่กึ่งกลางแนวตั้ง */
-        }
-
-        /* --- [END] Modern DataTables Styles --- */
-
-
-        .form-select, .form-input {
-            border-radius: 0.5rem;
-        }
-        .card {
-            background-color: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            transition: background-color 0.3s;
-        }
-        .btn-primary {
-            background-color: #2563eb;
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #1d4ed8;
-        }
-        .btn-secondary {
-            background-color: #4b5563;
-            color: white;
-        }
-        .btn-secondary:hover {
-            background-color: #374151;
-        }
-        .btn-danger {
-            background-color: #dc2626;
-            color: white;
-        }
-        .btn-danger:hover {
-            background-color: #b91c1c;
-        }
-        .btn-warning {
-             background-color: #f59e0b;
-             color: white;
-        }
-        .btn-warning:hover {
-            background-color: #d97706;
-        }
-        .btn-info {
-            background-color: #0ea5e9;
-            color: white;
-        }
-        .btn-info:hover {
-            background-color: #0284c7;
-        }
-        
-        /* Hide print area by default */
-        #print-area {
-            display: none;
-        }
-        
-        /* Modal Styles */
-        #form-modal-backdrop {
-            z-index: 40; /* backdrop */
-        }
-        #form-modal {
-            z-index: 50; /* modal content */
-        }
-        
-        /* Print-specific styles */
+        /* Print Styles */
         @media print {
-            /* Hide everything in the body by default */
             body * {
                 visibility: hidden;
             }
-            /* Make the print area and its children visible */
             #print-area, #print-area * {
                 visibility: visible;
             }
-            /* Ensure the print area is displayed as a block */
             #print-area {
-                display: block;
                 position: absolute;
                 left: 0;
                 top: 0;
                 width: 100%;
+                background: white;
+                padding: 20px;
+                display: block !important;
             }
-            /* Hide elements that should not be printed */
-            .no-print {
+            /* Hide modal and other UI elements */
+            #app > *:not(#print-area) {
                 display: none;
             }
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        /* Document styling for preview/print */
+        .doc-paper {
+            background: white;
+            padding: 2cm;
+            max-width: 210mm;
+            margin: 0 auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: none; /* Hidden by default, shown in print */
         }
     </style>
 </head>
-<body class="bg-gray-100 p-4 md:p-8">
+<body>
 
-    <div class="max-w-7xl mx-auto">
-        <header class="text-center mb-8 no-print">
-            <h1 class="text-3xl font-bold text-gray-800">ระบบจัดเก็บข้อมูลกำลังพล</h1>
-            <p class="text-gray-600 mt-2">จัดการข้อมูลส่วนบุคคล ที่อยู่ และเอกสารสำคัญของบุคลากร</p>
-        </header>
-
-        <div class="card no-print">
-            <h2 class="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">รายชื่อบุคลากร</h2>
-            
-            <div class="flex flex-wrap gap-2 mb-4">
-                <input type="text" id="name-search-input" class="block w-full md:w-1/2 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input" placeholder="ค้นหาด้วยชื่อ หรือ สกุล...">
-                <button type="button" id="search-btn" class="btn btn-primary text-sm">ค้นหา</button>
-                <button type="button" id="show-all-btn" class="btn btn-secondary text-sm">แสดงทั้งหมด</button>
-                <button type="button" id="add-new-btn" class="btn btn-primary text-sm ml-auto">เพิ่มข้อมูลใหม่</button>
-            </div>
-
-            <div class="flex flex-wrap gap-2 mb-4">
-                 <button id="print-pdf-btn" class="btn btn-info text-sm">พิมพ์รายงาน PDF</button>
-                 <button id="export-excel-btn" class="btn btn-info text-sm bg-green-600 hover:bg-green-700">ส่งออกเป็น Excel</button>
-                 <button id="create-doc-btn" class="btn btn-info text-sm disabled:opacity-50" disabled>สร้างประวัติ (Google Doc)</button>
-            </div>
-            <div class="overflow-x-auto">
-                <table id="personnel-table" class="w-full text-sm text-left text-gray-500">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3">ID</th>
-                            <th class="px-6 py-3">ยศ-ชื่อ-สกุล</th>
-                            <th class="px-6 py-3">สังกัด</th>
-                            <th class="px-6 py-3">ตำแหน่ง</th>
-                            <th class="px-6 py-3">เบอร์โทร</th>
-                            <th class="px-6 py-3">ปีเกษียณ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        </tbody>
-                </table>
+<div id="app" class="min-h-screen flex flex-col">
+    
+    <!-- Navbar -->
+    <nav class="military-gradient text-white shadow-lg sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-star crma-gold text-2xl mr-3"></i>
+                    <span class="font-bold text-xl tracking-wide">CRMA<span class="crma-gold">42</span> Directory</span>
+                </div>
+                <div>
+                    <button @click="openModal()" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg shadow-md transition duration-200 flex items-center text-sm sm:text-base">
+                        <i class="fa-solid fa-plus mr-2"></i> เพิ่มข้อมูล
+                    </button>
+                </div>
             </div>
         </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-7xl no-print">
         
-        <div id="print-area">
-             <h1 class="text-2xl font-bold text-center mb-6">รายงานข้อมูลกำลังพล</h1>
-             <div id="printable-content"></div>
+        <!-- Search & Filter -->
+        <div class="bg-white p-4 rounded-xl shadow-sm mb-8">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-search text-gray-400"></i>
+                </div>
+                <input 
+                    v-model="searchQuery" 
+                    type="text" 
+                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 sm:text-sm transition duration-150 ease-in-out" 
+                    placeholder="ค้นหา ชื่อ, ชื่อเล่น, สกุล, ยศ, เหล่า หรือ สังกัด..."
+                >
+            </div>
         </div>
-    </div>
 
-    <div id="form-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 hidden no-print"></div>
-    <div id="form-modal" class="fixed inset-0 overflow-y-auto hidden no-print">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-lg shadow-xl w-full max-w-7xl mx-auto relative">
-                <button id="close-modal-btn" type="button" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+        <!-- Loading State -->
+        <div v-if="loading" class="text-center py-12">
+            <i class="fa-solid fa-circle-notch fa-spin text-4xl text-green-800"></i>
+            <p class="mt-2 text-gray-600">กำลังโหลดข้อมูล...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else-if="filteredProfiles.length === 0" class="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
+            <i class="fa-solid fa-users-slash text-4xl text-gray-400 mb-3"></i>
+            <p class="text-gray-500">ไม่พบข้อมูลสมาชิก</p>
+            <button @click="openModal()" class="mt-4 text-green-700 font-medium hover:underline">เพิ่มข้อมูลคนแรก</button>
+        </div>
+
+        <!-- Profile Grid -->
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div v-for="profile in filteredProfiles" :key="profile.id" class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition duration-300 border-t-4 border-green-800 flex flex-col">
                 
-                <form id="personnel-form" class="p-6">
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2">
-                            <h2 class="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">ข้อมูลส่วนบุคคล</h2>
+                <!-- Card Header / Image -->
+                <div class="p-4 flex items-start space-x-4">
+                    <div class="flex-shrink-0">
+                        <img class="h-20 w-20 rounded-full object-cover border-2 border-yellow-500 shadow-sm" 
+                             :src="profile.photoUrl || 'https://via.placeholder.com/150?text=No+Image'" 
+                             @error="$event.target.src='https://via.placeholder.com/150?text=User'"
+                             alt="Profile">
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <!-- Modified: Rank (Unit) (Corps) -->
+                        <p class="text-sm font-medium text-yellow-600 truncate mb-0.5">
+                            {{ profile.rank }} 
+                            <span v-if="profile.unit">({{ profile.unit }})</span>
+                            <span v-if="profile.corps">({{ profile.corps }})</span>
+                        </p>
+                        <p class="text-lg font-bold text-gray-900 truncate">
+                            {{ profile.firstName }} 
+                            <span v-if="profile.nickname" class="text-gray-500 text-base font-normal">({{ profile.nickname }})</span>
+                            {{ profile.lastName }}
+                        </p>
+                        <p class="text-sm text-gray-500 truncate">{{ profile.position }}</p>
+                        <!-- Unit badge moved/kept but info is duplicated in title as requested -->
+                        <!-- <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mt-2">
+                            {{ profile.unit }}
+                        </span> -->
+                    </div>
+                </div>
+
+                <!-- Contact Info (Quick View) -->
+                <div class="px-4 py-2 bg-gray-50 border-t border-gray-100 text-sm grid grid-cols-2 gap-2">
+                    <a :href="'tel:' + profile.phone1" class="flex items-center text-gray-600 hover:text-green-700">
+                        <i class="fa-solid fa-phone w-5 text-center mr-1"></i> {{ profile.phone1 }}
+                    </a>
+                    <div class="flex items-center text-gray-600" v-if="profile.lineId">
+                        <i class="fa-brands fa-line w-5 text-center mr-1 text-green-500"></i> {{ profile.lineId }}
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-auto border-t border-gray-100 flex divide-x divide-gray-100 bg-gray-50">
+                    <button @click="viewDetails(profile)" class="flex-1 py-3 text-sm font-medium text-blue-600 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-circle-info mr-1"></i> รายละเอียด
+                    </button>
+                    <button @click="editProfile(profile)" class="flex-1 py-3 text-sm font-medium text-yellow-600 hover:bg-yellow-50 transition">
+                        <i class="fa-solid fa-pen mr-1"></i> แก้ไข
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal (Add/Edit/View) -->
+    <div v-if="showModal" class="fixed inset-0 z-50 overflow-y-auto no-print" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            
+            <!-- Overlay -->
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" @click="closeModal"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <!-- Modal Content -->
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                
+                <!-- Modal Header -->
+                <div class="bg-green-900 px-4 py-3 sm:px-6 flex justify-between items-center">
+                    <h3 class="text-lg leading-6 font-medium text-white" id="modal-title">
+                        <span v-if="modalMode === 'view'"><i class="fa-solid fa-id-card mr-2"></i>ข้อมูลประวัติ</span>
+                        <span v-else-if="modalMode === 'edit'"><i class="fa-solid fa-pen-to-square mr-2"></i>แก้ไขข้อมูล</span>
+                        <span v-else><i class="fa-solid fa-user-plus mr-2"></i>เพิ่มสมาชิกใหม่</span>
+                    </h3>
+                    <button @click="closeModal" class="text-gray-300 hover:text-white focus:outline-none">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4 max-h-[70vh] overflow-y-auto bg-gray-50">
+                    
+                    <!-- View Mode -->
+                    <div v-if="modalMode === 'view'" class="space-y-6">
+                        <div class="text-center mb-6">
+                            <img class="h-32 w-32 rounded-full mx-auto border-4 border-white shadow-lg object-cover" :src="form.photoUrl || 'https://via.placeholder.com/150'" alt="">
+                            <h2 class="mt-3 text-2xl font-bold text-gray-900">
+                                {{ form.rank }} {{ form.firstName }} {{ form.lastName }}
+                            </h2>
+                            <p v-if="form.nickname" class="text-gray-500 text-lg">ชื่อเล่น: {{ form.nickname }}</p>
+                            
+                            <p class="text-gray-500 font-medium mt-1">
+                                {{ form.position }} 
+                                <span v-if="form.corps" class="mx-2 text-gray-400">|</span> เหล่า {{ form.corps }}
+                            </p>
+                            <div class="mt-2 inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">{{ form.unit }}</div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Personal -->
+                            <div class="bg-white p-4 rounded-lg shadow-sm">
+                                <h4 class="text-green-800 font-bold border-b pb-2 mb-3"><i class="fa-solid fa-user-shield mr-2"></i>ข้อมูลส่วนตัว</h4>
+                                <div class="grid grid-cols-2 gap-y-2 text-sm">
+                                    <span class="text-gray-500">เลขทหาร:</span> <span class="font-medium">{{ form.militaryId || '-' }}</span>
+                                    <span class="text-gray-500">วันเกิด:</span> <span class="font-medium">{{ formatDate(form.birthDate) }}</span>
+                                    <span class="text-gray-500">ปีเกษียณ:</span> <span class="font-medium text-red-600">{{ form.retirementYear || '-' }}</span>
+                                    <span class="text-gray-500">สถานภาพ:</span> <span class="font-medium">{{ form.status || '-' }}</span>
+                                    <span class="text-gray-500">จำนวนบุตร:</span> 
+                                    <span class="font-medium">
+                                        <i class="fa-solid fa-child text-blue-500 ml-1"></i> ชาย {{ form.childrenMale || 0 }}
+                                        <i class="fa-solid fa-child-dress text-pink-500 ml-1"></i> หญิง {{ form.childrenFemale || 0 }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Signature View -->
+                            <div v-if="form.signatureUrl" class="bg-white p-4 rounded-lg shadow-sm md:col-span-2">
+                                <h4 class="text-green-800 font-bold border-b pb-2 mb-3"><i class="fa-solid fa-file-signature mr-2"></i>ลายเซ็น</h4>
+                                <div class="flex justify-center p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                                    <img :src="form.signatureUrl" alt="ลายเซ็น" class="max-h-32 object-contain">
+                                </div>
+                            </div>
+
+                            <!-- Contact -->
+                            <div class="bg-white p-4 rounded-lg shadow-sm">
+                                <h4 class="text-green-800 font-bold border-b pb-2 mb-3"><i class="fa-solid fa-address-book mr-2"></i>การติดต่อ</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex"><span class="text-gray-500 w-24">โทรศัพท์ 1:</span> <a :href="'tel:'+form.phone1" class="text-blue-600 font-medium">{{ form.phone1 || '-' }}</a></div>
+                                    <div class="flex"><span class="text-gray-500 w-24">โทรศัพท์ 2:</span> <span>{{ form.phone2 || '-' }}</span></div>
+                                    <div class="flex"><span class="text-gray-500 w-24">Email:</span> <span>{{ form.email || '-' }}</span></div>
+                                    <div class="flex"><span class="text-gray-500 w-24">Line ID:</span> <span class="text-green-600 font-medium">{{ form.lineId || '-' }}</span></div>
+                                </div>
+                            </div>
+
+                            <!-- Address -->
+                            <div class="bg-white p-4 rounded-lg shadow-sm md:col-span-2">
+                                <h4 class="text-green-800 font-bold border-b pb-2 mb-3"><i class="fa-solid fa-map-location-dot mr-2"></i>ที่อยู่ปัจจุบัน</h4>
+                                <p class="text-gray-700 text-sm leading-relaxed">
+                                    {{ form.houseNo ? 'บ้านเลขที่ ' + form.houseNo : '' }} 
+                                    {{ form.soi ? 'ซ.' + form.soi : '' }} 
+                                    {{ form.road ? 'ถ.' + form.road : '' }} <br>
+                                    {{ form.subdistrict ? 'ต./แขวง ' + form.subdistrict : '' }} 
+                                    {{ form.district ? 'อ./เขต ' + form.district : '' }} <br>
+                                    {{ form.province ? 'จ.' + form.province : '' }} 
+                                    {{ form.zipCode }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit/Add Form -->
+                    <form v-else @submit.prevent="submitForm" class="space-y-6">
+                        <!-- Section 1: รูปและข้อมูลหลัก -->
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <h4 class="text-lg font-semibold text-gray-700 mb-4">ข้อมูลพื้นฐาน</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Profile Photo Upload -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">รูปประจำตัว (.jpg, .png ขนาดไม่เกิน 500KB)</label>
+                                    <div class="flex items-center space-x-6">
+                                        <!-- Photo Preview -->
+                                        <div class="flex-shrink-0 relative group">
+                                            <img 
+                                                :src="form.photoUrl || 'https://via.placeholder.com/150?text=No+Image'" 
+                                                class="h-24 w-24 rounded-full object-cover border-2 border-gray-300 shadow-sm"
+                                                @error="$event.target.src='https://via.placeholder.com/150?text=User'"
+                                                alt="รูปประจำตัว"
+                                            >
+                                            <button v-if="form.photoUrl" @click="form.photoUrl = ''" type="button" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md hover:bg-red-600 text-xs transition" title="ลบรูปภาพ">
+                                                <i class="fa-solid fa-times"></i>
+                                            </button>
+                                        </div>
+                                        <!-- Upload Input -->
+                                        <div class="flex-1">
+                                            <input type="file" accept="image/png, image/jpeg" @change="handlePhotoUpload" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-green-700 hover:file:bg-green-200 transition cursor-pointer">
+                                            <p class="text-xs text-gray-500 mt-1">รองรับไฟล์ภาพ JPG และ PNG ขนาดไม่เกิน 500KB</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Rank Dropdown -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">ยศ <span class="text-red-500">*</span></label>
+                                    <div class="flex space-x-2">
+                                        <select v-model="selectedRankType" @change="handleRankChange" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                            <option v-for="rank in rankOptions" :key="rank" :value="rank">{{ rank }}</option>
+                                            <option value="อื่นๆ">อื่นๆ</option>
+                                        </select>
+                                    </div>
+                                    <!-- Custom Rank Input -->
+                                    <input v-if="selectedRankType === 'อื่นๆ'" v-model="form.rank" type="text" placeholder="ระบุยศ..." class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border animate-fade-in">
+                                </div>
+
+                                <!-- Military ID (10 Digits) -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">เลขทหาร (10 หลัก)</label>
+                                    <input v-model="form.militaryId" @input="enforceNumericInput($event, 'militaryId')" type="text" maxlength="10" placeholder="เฉพาะตัวเลข 10 หลัก" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">ชื่อ <span class="text-red-500">*</span></label>
+                                    <input v-model="form.firstName" type="text" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">นามสกุล <span class="text-red-500">*</span></label>
+                                    <input v-model="form.lastName" type="text" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                </div>
+
+                                <!-- Nickname -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">ชื่อเล่น</label>
+                                    <input v-model="form.nickname" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                </div>
+
+                                <!-- Corps Dropdown -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">เหล่า</label>
+                                    <div class="flex space-x-2">
+                                        <select v-model="selectedCorpsType" @change="handleCorpsChange" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                            <option value="">-- เลือกเหล่า --</option>
+                                            <option v-for="corps in corpsOptions" :key="corps" :value="corps">{{ corps }}</option>
+                                            <option value="อื่นๆ">อื่นๆ</option>
+                                        </select>
+                                    </div>
+                                    <!-- Custom Corps Input -->
+                                    <input v-if="selectedCorpsType === 'อื่นๆ'" v-model="form.corps" type="text" placeholder="ระบุเหล่า..." class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border animate-fade-in">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">ตำแหน่ง</label>
+                                    <input v-model="form.position" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                </div>
+                                
+                                <!-- Unit Dropdown -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">สังกัด</label>
+                                    <select v-model="form.unit" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                        <option value="">-- เลือกสังกัด --</option>
+                                        <option v-for="unit in unitOptions" :key="unit" :value="unit">{{ unit }}</option>
+                                    </select>
+                                </div>
+
+                                <!-- Signature Upload -->
+                                <div class="md:col-span-2 bg-gray-50 p-3 rounded border border-gray-200 border-dashed">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">ลายเซ็น (แนบไฟล์ภาพ .png)</label>
+                                    <div class="flex items-center space-x-4">
+                                        <input type="file" accept="image/png" @change="handleSignatureUpload" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-green-700 hover:file:bg-green-200">
+                                    </div>
+                                    <p class="text-xs text-gray-400 mt-1">* รองรับเฉพาะไฟล์ .png ขนาดไม่เกิน 500KB</p>
+                                    
+                                    <!-- Preview Signature -->
+                                    <div v-if="form.signatureUrl" class="mt-3 relative inline-block group">
+                                        <div class="border border-gray-300 bg-white p-2 rounded">
+                                            <img :src="form.signatureUrl" class="h-20 object-contain">
+                                        </div>
+                                        <button @click="form.signatureUrl = ''" type="button" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md hover:bg-red-600 text-xs">
+                                            <i class="fa-solid fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section: วันเกิดและเกษียณ -->
+                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-yellow-500">
+                            <h4 class="text-lg font-semibold text-gray-700 mb-4">ข้อมูลวันเกิด & การเกษียณ</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label for="rank" class="block text-sm font-medium text-gray-700">ยศ</label>
-                                    <select id="rank" name="rank" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-select">
-                                        <option>พล.อ.</option><option>พล.ท.</option><option>พล.ต.</option>
-                                        <option>พ.อ.(พ.)</option><option>พ.อ.</option><option>พ.ท.</option><option>พ.ต.</option>
-                                        <option value="อื่นๆ">อื่นๆ</option>
-                                    </select>
-                                </div>
-                                <div id="rank_other_wrapper" class="hidden">
-                                    <label for="rank_other" class="block text-sm font-medium text-gray-700">ระบุยศอื่นๆ</label>
-                                    <input type="text" id="rank_other" name="rank_other" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
+                                    <label class="block text-sm font-medium text-gray-700">วันเกิด</label>
+                                    <input v-model="form.birthDate" @change="calculateRetirement" type="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
                                 </div>
                                 <div>
-                                    <label for="fname" class="block text-sm font-medium text-gray-700">ชื่อ</label>
-                                    <input type="text" id="fname" name="fname" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
-                                </div>
-                                <div>
-                                    <label for="lname" class="block text-sm font-medium text-gray-700">สกุล</label>
-                                    <input type="text" id="lname" name="lname" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
-                                </div>
-                                <div>
-                                    <label for="nickname" class="block text-sm font-medium text-gray-700">ชื่อเล่น</label>
-                                    <input type="text" id="nickname" name="nickname" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
-                                </div>
-                                <div>
-                                    <label for="birthday" class="block text-sm font-medium text-gray-700">วันเกิด</label>
-                                    <input type="date" id="birthday" name="birthday" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
-                                </div>
-                                <div>
-                                    <label for="phone" class="block text-sm font-medium text-gray-700">เบอร์โทร</label>
-                                    <input type="tel" id="phone" name="phone" required pattern="[0-9]{9,10}" placeholder="08xxxxxxxx" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
-                                </div>
-                                <div>
-                                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                                    <input type="email" id="email" name="email" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
-                                </div>
-                                <div>
-                                    <label for="affiliation" class="block text-sm font-medium text-gray-700">สังกัด</label>
-                                    <select id="affiliation" name="affiliation" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-select">
-                                        <option>ทบ.</option><option>สป.กห.</option><option>ทท.</option><option>สทป.</option><option value="อื่นๆ">อื่นๆ</option>
-                                    </select>
-                                </div>
-                                <div id="affiliation_other_wrapper" class="hidden">
-                                    <label for="affiliation_other" class="block text-sm font-medium text-gray-700">ระบุสังกัดอื่นๆ</label>
-                                    <input type="text" id="affiliation_other" name="affiliation_other" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
-                                </div>
-                                 <div>
-                                    <label for="position" class="block text-sm font-medium text-gray-700">ตำแหน่ง</label>
-                                    <input type="text" id="position" name="position" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
-                                </div>
-                                <div>
-                                    <label for="corps" class="block text-sm font-medium text-gray-700">เหล่า</label>
-                                    <select id="corps" name="corps" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-select">
-                                        <option>ร.</option><option>ม.</option><option>ป.</option><option>ช.</option><option>ส.</option>
-                                        <option>สพ.</option><option>ขส.</option><option>พธ.</option><option>สห.</option><option>ผท.</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="retirement_year" class="block text-sm font-medium text-gray-700">ปีเกษียณ (พ.ศ.)</label>
-                                    <input type="number" id="retirement_year" name="retirement_year" min="2567" max="2650" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
-                                </div>
-                                <div>
-                                    <label for="marital_status" class="block text-sm font-medium text-gray-700">สถานภาพ</label>
-                                    <select id="marital_status" name="marital_status" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-select">
-                                        <option>โสด</option><option>สมรส</option><option>หย่าร้าง</option><option>หม้าย</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="children_count" class="block text-sm font-medium text-gray-700">จำนวนบุตร</label>
-                                    <input type="number" id="children_count" name="children_count" min="0" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
+                                    <label class="block text-sm font-medium text-gray-700">ปีเกษียณ (30 ก.ย. อายุครบ 60 ปี)</label>
+                                    <input v-model="form.retirementYear" type="text" readonly class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed shadow-sm p-2 border">
                                 </div>
                             </div>
                         </div>
 
-                        <div class="lg:col-span-1">
-                            <h2 class="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">ข้อมูลที่อยู่และรูปภาพ</h2>
-                            <div>
-                                <label for="house_number" class="block text-sm font-medium text-gray-700">บ้านเลขที่</label>
-                                <input type="text" id="house_number" name="house_number" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
-                            </div>
-                            <div class="mt-4">
-                                <label for="road" class="block text-sm font-medium text-gray-700">ถนน</label>
-                                <input type="text" id="road" name="road" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
-                            </div>
-                            <div class="mt-4">
-                                <label for="sub_district" class="block text-sm font-medium text-gray-700">ตำบล/แขวง</label>
-                                <input type="text" id="sub_district" name="sub_district" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
-                            </div>
-                            <div class="mt-4">
-                                <label for="district" class="block text-sm font-medium text-gray-700">อำเภอ/เขต</label>
-                                <input type="text" id="district" name="district" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
-                            </div>
-                            <div class="mt-4">
-                                <label for="province" class="block text-sm font-medium text-gray-700">จังหวัด</label>
-                                <input type="text" id="province" name="province" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
-                            </div>
-                            <div class="mt-4">
-                                <label for="zipcode" class="block text-sm font-medium text-gray-700">รหัสไปรษณีย์</label>
-                                <input type="text" id="zipcode" name="zipcode" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
-                            </div>
-                            <div class="mt-4">
-                                <label for="profile_pic" class="block text-sm font-medium text-gray-700">รูปภาพโปรไฟล์</label>
-                                <input type="file" id="profile_pic" name="profile_pic" accept=".jpg, .jpeg, .png" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                                <img id="image_preview" src="https://placehold.co/200x200/e2e8f0/adb5bd?text=Preview" alt="Profile preview" class="mt-4 rounded-md w-48 h-48 object-cover mx-auto">
+                        <!-- Section 2: การติดต่อ & ครอบครัว -->
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <h4 class="text-lg font-semibold text-gray-700 mb-4">การติดต่อ & ครอบครัว</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">เบอร์โทรหลัก (10 หลัก) <span class="text-red-500">*</span></label>
+                                    <input v-model="form.phone1" @input="enforceNumericInput($event, 'phone1')" type="tel" maxlength="10" required placeholder="08XXXXXXXX" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">เบอร์โทรสำรอง (10 หลัก)</label>
+                                    <input v-model="form.phone2" @input="enforceNumericInput($event, 'phone2')" type="tel" maxlength="10" placeholder="08XXXXXXXX" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">อีเมล์</label>
+                                    <input v-model="form.email" type="email" placeholder="example@email.com" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">ไอดีไลน์</label>
+                                    <input v-model="form.lineId" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                </div>
+                                <div v-if="form.unit !== 'เสียชีวิต'">
+                                    <label class="block text-sm font-medium text-gray-700">สถานภาพ</label>
+                                    <select v-model="form.status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                        <option value="โสด">โสด</option>
+                                        <option value="สมรส">สมรส</option>
+                                        <option value="หย่าร้าง">หย่าร้าง</option>
+                                        <option value="หม้าย">หม้าย</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Children (Split Male/Female) -->
+                                <div class="bg-gray-50 p-3 rounded border border-gray-200">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">จำนวนบุตร</label>
+                                    <div class="flex space-x-4">
+                                        <div class="flex-1">
+                                            <label class="text-xs text-gray-500 mb-1 block"><i class="fa-solid fa-child text-blue-500"></i> ชาย (คน)</label>
+                                            <input v-model="form.childrenMale" type="number" min="0" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border text-center">
+                                        </div>
+                                        <div class="flex-1">
+                                            <label class="text-xs text-gray-500 mb-1 block"><i class="fa-solid fa-child-dress text-pink-500"></i> หญิง (คน)</label>
+                                            <input v-model="form.childrenFemale" type="number" min="0" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border text-center">
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
-                    </div>
 
-                    <div class="flex flex-wrap gap-2 justify-center mt-6">
-                        <input type="hidden" id="recordId" name="id"> <button type="submit" id="save-btn" class="btn btn-primary">บันทึกข้อมูล</button>
-                        <button type="button" id="update-btn" class="btn btn-warning hidden">อัปเดตข้อมูล</button>
-                        <button type="button" id="delete-btn" class="btn btn-danger hidden">ลบข้อมูล</button>
-                        <button type="button" id="clear-btn" class="btn btn-secondary">ล้างฟอร์ม</button>
-                    </div>
-                </form>
+                        <!-- Section 3: ที่อยู่ -->
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <h4 class="text-lg font-semibold text-gray-700 mb-4">ที่อยู่ปัจจุบัน</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">บ้านเลขที่</label>
+                                    <input v-model="form.houseNo" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">ซอย</label>
+                                    <input v-model="form.soi" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">ถนน</label>
+                                    <input v-model="form.road" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">ตำบล/แขวง</label>
+                                    <input v-model="form.subdistrict" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">อำเภอ/เขต</label>
+                                    <input v-model="form.district" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">จังหวัด</label>
+                                    <input v-model="form.province" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">รหัสไปรษณีย์ (5 หลัก)</label>
+                                    <input v-model="form.zipCode" @input="enforceNumericInput($event, 'zipCode')" type="text" maxlength="5" placeholder="10XXX" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 p-2 border">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    
+                    <!-- View Mode Buttons -->
+                    <template v-if="modalMode === 'view'">
+                        <!-- Print/PDF Button -->
+                        <button @click="printProfile" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                            <i class="fa-solid fa-print mr-2 mt-1"></i> พิมพ์ / PDF
+                        </button>
+                        
+                        <!-- Word Export Button -->
+                        <button @click="exportWord" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-800 text-base font-medium text-white hover:bg-blue-900 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            <i class="fa-solid fa-file-word mr-2 mt-1"></i> ดาวน์โหลด .DOC
+                        </button>
+                    </template>
+
+                    <template v-if="modalMode !== 'view'">
+                        <button @click="submitForm" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-700 text-base font-medium text-white hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">
+                            <i class="fa-solid fa-save mr-2 mt-1"></i> บันทึกข้อมูล
+                        </button>
+                    </template>
+                    <template v-if="modalMode === 'edit'">
+                        <button @click="confirmDelete" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            <i class="fa-solid fa-trash mr-2 mt-1"></i> ลบ
+                        </button>
+                    </template>
+                    <button @click="closeModal" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        ปิด
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Hidden Print Area -->
+    <div id="print-area" class="doc-paper" style="display: none;">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-black">ประวัติย่อ (Bio Data)</h1>
+            <h2 class="text-xl font-bold text-black mt-2">ทำเนียบรุ่นเตรียมทหาร CRMA42</h2>
+        </div>
 
-    <script>
-    $(document).ready(function() {
-        // --- GLOBAL VARIABLES ---
-        let personnelData = []; // This will store the MASTER list of all personnel
-        let dataTable = null;
-        let selectedRowData = null;
+        <div class="flex justify-between items-start border-b-2 border-black pb-4 mb-6">
+            <div class="flex-1">
+                <div class="grid grid-cols-2 gap-y-2 text-black">
+                    <p><strong>ยศ-ชื่อ-สกุล:</strong> {{ form.rank }} {{ form.firstName }} {{ form.lastName }}</p>
+                    <p><strong>ชื่อเล่น:</strong> {{ form.nickname || '-' }}</p>
+                    <p><strong>สังกัด:</strong> {{ form.unit }}</p>
+                    <p><strong>เหล่า:</strong> {{ form.corps }}</p>
+                    <p><strong>ตำแหน่ง:</strong> {{ form.position }}</p>
+                    <p><strong>เลขทหาร:</strong> {{ form.militaryId || '-' }}</p>
+                </div>
+            </div>
+            <div class="w-32 h-40 border border-gray-300 flex items-center justify-center overflow-hidden ml-4">
+                 <img v-if="form.photoUrl" :src="form.photoUrl" class="w-full h-full object-cover">
+                 <span v-else class="text-xs text-gray-500">รูปถ่าย</span>
+            </div>
+        </div>
 
-        // --- CUSTOM SORTING DEFINITIONS ---
-        // Define sorting order for Rank
-        const rankOrder = {
-            'พล.อ.': 1, 'พล.ท.': 2, 'พล.ต.': 3, 'พ.อ.(พ.)': 4,
-            'พ.อ.': 5, 'พ.ท.': 6, 'พ.ต.': 7
-        };
-        // Define sorting order for Affiliation
-        const affiliationOrder = { 'ทบ.': 1, 'สป.กห.': 2, 'ทท.': 3, 'สทป.': 4 };
+        <div class="mb-6">
+            <h3 class="text-lg font-bold border-b border-gray-400 mb-2">ข้อมูลส่วนตัว</h3>
+            <div class="grid grid-cols-2 gap-4 text-black">
+                 <p><strong>วันเกิด:</strong> {{ formatDate(form.birthDate) }}</p>
+                 <p><strong>ปีที่เกษียณ:</strong> {{ form.retirementYear }}</p>
+                 <p><strong>สถานภาพ:</strong> {{ form.status }}</p>
+                 <p><strong>จำนวนบุตร:</strong> ชาย {{ form.childrenMale }} คน, หญิง {{ form.childrenFemale }} คน</p>
+            </div>
+        </div>
 
-        // Register custom sorting types with DataTables
-        DataTable.ext.type.order['rank-sort-pre'] = function (d) {
-            return rankOrder[d] || 99; // Default to 99 for 'อื่นๆ' or unmatched
-        };
-        DataTable.ext.type.order['affiliation-sort-pre'] = function (d) {
-            return affiliationOrder[d] || 99; // Default to 99 for 'อื่นๆ' or unmatched
-        };
+        <div class="mb-6">
+            <h3 class="text-lg font-bold border-b border-gray-400 mb-2">ข้อมูลการติดต่อ</h3>
+            <div class="grid grid-cols-2 gap-4 text-black">
+                 <p><strong>เบอร์โทรศัพท์ (หลัก):</strong> {{ form.phone1 }}</p>
+                 <p><strong>เบอร์โทรศัพท์ (สำรอง):</strong> {{ form.phone2 || '-' }}</p>
+                 <p><strong>Email:</strong> {{ form.email || '-' }}</p>
+                 <p><strong>Line ID:</strong> {{ form.lineId || '-' }}</p>
+            </div>
+        </div>
 
+        <div class="mb-6">
+            <h3 class="text-lg font-bold border-b border-gray-400 mb-2">ที่อยู่ปัจจุบัน</h3>
+            <p class="text-black leading-relaxed">
+                {{ form.houseNo ? 'บ้านเลขที่ ' + form.houseNo : '' }} 
+                {{ form.soi ? 'ซอย ' + form.soi : '' }} 
+                {{ form.road ? 'ถนน ' + form.road : '' }} <br>
+                {{ form.subdistrict ? 'ต./แขวง ' + form.subdistrict : '' }} 
+                {{ form.district ? 'อ./เขต ' + form.district : '' }} <br>
+                {{ form.province ? 'จังหวัด ' + form.province : '' }} 
+                {{ form.zipCode ? 'รหัสไปรษณีย์ ' + form.zipCode : '' }}
+            </p>
+        </div>
 
-        // --- MODAL FUNCTIONS ---
-        function showModal() {
-            $('#form-modal-backdrop').removeClass('hidden');
-            $('#form-modal').removeClass('hidden');
-        }
-        function hideModal() {
-            $('#form-modal-backdrop').addClass('hidden');
-            $('#form-modal').addClass('hidden');
-        }
+        <div class="mt-12 text-right" v-if="form.signatureUrl">
+            <img :src="form.signatureUrl" class="h-16 inline-block mb-2">
+            <p class="text-sm">(ลายมือชื่อเจ้าของประวัติ)</p>
+        </div>
+    </div>
 
-        // --- INITIALIZATION ---
-        function initializeDataTable() {
-            if (dataTable) {
-                dataTable.destroy();
+</div>
+
+<script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+    const firebaseConfig = JSON.parse(__firebase_config);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+    const { createApp } = Vue;
+
+    createApp({
+        data() {
+            return {
+                profiles: [],
+                loading: true,
+                searchQuery: '',
+                showModal: false,
+                modalMode: 'add',
+                user: null,
+                selectedRankType: 'พล.อ.', 
+                selectedCorpsType: 'ร.',
+                rankOptions: ['พล.อ.', 'พล.ท.', 'พล.ต.', 'พ.อ.(พ.)', 'พ.อ.', 'พ.ท.'],
+                corpsOptions: ['ร.', 'ม.', 'ป.', 'ช.', 'ส.', 'สพ.', 'ขส.', 'พธ.', 'สห.', 'ผท.'],
+                unitOptions: ['ทบ.', 'กห.สป.', 'บก.ทท.', 'ทม.รอ.', 'สทป.', 'ลาออก', 'เสียชีวิต'],
+                form: {
+                    id: null,
+                    photoUrl: '',
+                    signatureUrl: '',
+                    militaryId: '',
+                    rank: '',
+                    firstName: '',
+                    lastName: '',
+                    nickname: '',
+                    corps: '',
+                    position: '',
+                    unit: '',
+                    birthDate: '',
+                    retirementYear: '',
+                    phone1: '',
+                    phone2: '',
+                    email: '',
+                    lineId: '',
+                    status: 'สมรส',
+                    childrenMale: 0,
+                    childrenFemale: 0,
+                    houseNo: '',
+                    soi: '',
+                    road: '',
+                    subdistrict: '',
+                    district: '',
+                    province: '',
+                    zipCode: ''
+                },
+                defaultForm: {}
             }
-            dataTable = new DataTable('#personnel-table', {
-                responsive: true,
-                data: personnelData, // Use the master list for initial load
-                
-                // 'l' = length, 'r' = processing, 't' = table, 'i' = info, 'p' = pagination
-                // 'lrtip' คือ layout เริ่มต้นของ DataTables Tailwind
-                dom: 'lrtip', 
-                
-                pageLength: 10, // [EDIT] Set default page length to 10
-                columns: [
-                    { data: 'id' },
-                    { 
-                        data: 'rank',
-                        render: (data, type, row) => `${row.rank || ''} ${row.fname || ''} ${row.lname || ''}`
-                    },
-                    { data: 'affiliation' },
-                    { data: 'position' },
-                    { data: 'phone' },
-                    { data: 'retirement_year' },
-                ],
-                columnDefs: [
-                    { "width": "5%", "targets": 0 },
-                    { type: 'rank-sort', "targets": 1 }, // Apply custom rank sort to column 1
-                    { type: 'affiliation-sort', "targets": 2 } // Apply custom affiliation sort to column 2
-                ],
-                // Default sort by Rank (col 1) then Affiliation (col 2)
-                order: [
-                    [1, 'asc'], 
-                    [2, 'asc']
-                ]
-            });
-
-            $('#personnel-table tbody').on('click', 'tr', function () {
-                if ($(this).hasClass('bg-blue-200')) {
-                    $(this).removeClass('bg-blue-200');
-                    clearForm();
-                    selectedRowData = null;
+        },
+        computed: {
+            filteredProfiles() {
+                if (!this.searchQuery) return this.profiles;
+                const lowerQuery = this.searchQuery.toLowerCase();
+                return this.profiles.filter(p => 
+                    (p.firstName && p.firstName.toLowerCase().includes(lowerQuery)) ||
+                    (p.lastName && p.lastName.toLowerCase().includes(lowerQuery)) ||
+                    (p.nickname && p.nickname.toLowerCase().includes(lowerQuery)) ||
+                    (p.unit && p.unit.toLowerCase().includes(lowerQuery)) ||
+                    (p.rank && p.rank.toLowerCase().includes(lowerQuery)) ||
+                    (p.corps && p.corps.toLowerCase().includes(lowerQuery))
+                );
+            }
+        },
+        mounted() {
+            this.form.rank = this.rankOptions[0]; 
+            this.defaultForm = JSON.parse(JSON.stringify(this.form)); 
+            this.initAuth();
+        },
+        methods: {
+            async initAuth() {
+                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
-                    dataTable.$('tr.bg-blue-200').removeClass('bg-blue-200');
-                    $(this).addClass('bg-blue-200');
-                    selectedRowData = dataTable.row(this).data();
-                    populateForm(selectedRowData);
+                    await signInAnonymously(auth);
                 }
-                 $('#create-doc-btn').prop('disabled', !selectedRowData);
-            });
-        }
-
-        // --- DATA HANDLING ---
-        function loadData() {
-            Swal.fire({
-                title: 'กำลังโหลดข้อมูล...',
-                text: 'กรุณารอสักครู่',
-                allowOutsideClick: false,
-                didOpen: () => { Swal.showLoading(); }
-            });
-
-            console.log("Attempting to call server function 'getData'..."); // [DEBUG]
-            google.script.run
-                .withSuccessHandler(function(response) {
-                    Swal.close();
-                     console.log("Server response received for 'getData':", response); // [DEBUG]
-                    // [FIX] Add check for null or undefined response
-                    if (response && response.success && response.data) {
-                        console.log("Data load success:", response.data.length, "rows"); // [DEBUG]
-                        personnelData = response.data; // Store the master list
-                        initializeDataTable(); // Initialize table with master list
-                    } else {
-                        // Handle cases where response is null or response.success is false
-                        const errorMessage = response ? response.message : 'ไม่ได้รับการตอบกลับจากเซิร์ฟเวอร์ (อาจหมดเวลา)';
-                        Swal.fire('เกิดข้อผิดพลาด!', 'ไม่สามารถโหลดข้อมูลได้: ' + errorMessage, 'error');
-                        console.error('Error loading data, server response:', response);
+                
+                onAuthStateChanged(auth, (user) => {
+                    this.user = user;
+                    if (user) {
+                        this.fetchProfiles();
                     }
-                })
-                .withFailureHandler(function(error) {
-                    Swal.close();
-                    Swal.fire('เกิดข้อผิดพลาด!', 'การเชื่อมต่อกับเซิร์ฟเวอร์ล้มเหลว', 'error');
-                    console.error('Error loading data:', error);
-                })
-                .getData();
-        }
-        
-        function handleSave(formData) {
-            const serverFunction = formData.id ? 'updateData' : 'saveData';
-            const actionText = formData.id ? 'อัปเดต' : 'บันทึก';
-            
-            Swal.fire({
-                title: `กำลัง${actionText}ข้อมูล...`,
-                allowOutsideClick: false,
-                didOpen: () => { Swal.showLoading(); }
-            });
-
-            google.script.run
-                .withSuccessHandler(function(response) {
-                     if (response && response.success && response.data) {
-                         Swal.fire('สำเร็จ!', `${actionText}ข้อมูลเรียบร้อยแล้ว`, 'success');
-                         hideModal();
-                         loadData(); // Reload all data from server to get the master list updated
-                         clearForm();
-                     } else {
-                         const errorMessage = response ? response.message : 'ไม่ได้รับการตอบกลับจากเซิร์ฟเวอร์';
-                         Swal.fire('เกิดข้อผิดพลาด!', `ไม่สามารถ${actionText}ข้อมูลได้: ${errorMessage}`, 'error');
-                     }
-                })
-                .withFailureHandler(function(error){
-                    Swal.fire('เกิดข้อผิดพลาด!', 'การเชื่อมต่อกับเซิร์ฟเวอร์ล้มเหลว', 'error');
-                })
-                [serverFunction](formData);
-        }
-
-        function handleDelete(id) {
-            Swal.fire({
-                title: 'คุณแน่ใจหรือไม่?',
-                text: "คุณจะไม่สามารถกู้คืนข้อมูลนี้ได้!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'ใช่, ลบเลย!',
-                cancelButtonText: 'ยกเลิก'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'กำลังลบข้อมูล...',
-                        allowOutsideClick: false,
-                        didOpen: () => { Swal.showLoading(); }
-                    });
-                    google.script.run
-                        .withSuccessHandler(function(response){
-                             if(response && response.success){
-                                 Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบเรียบร้อยแล้ว', 'success');
-                                 hideModal();
-                                 loadData(); // Reload all data from server
-                                 clearForm();
-                               } else { 
-                                 const errorMessage = response ? response.message : 'ไม่ได้รับการตอบกลับจากเซิร์ฟเวอร์';
-                                 Swal.fire('เกิดข้อผิดพลาด!', `ไม่สามารถลบข้อมูลได้: ${errorMessage}`, 'error');
-                               }
-                        })
-                        .withFailureHandler(function(error){
-                             Swal.fire('เกิดข้อผิดพลาด!', `การเชื่อมต่อกับเซิร์ฟเวอร์ล้มเหลว`, 'error');
-                        })
-                        .deleteData({ id: id });
+                });
+            },
+            fetchProfiles() {
+                const q = collection(db, 'artifacts', appId, 'public', 'data', 'crma42_profiles');
+                onSnapshot(q, (querySnapshot) => {
+                    this.profiles = querySnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    this.loading = false;
+                }, (error) => {
+                    console.error("Error fetching profiles: ", error);
+                    this.loading = false;
+                });
+            },
+            openModal(mode = 'add') {
+                this.modalMode = mode;
+                if (mode === 'add') {
+                    this.resetForm();
                 }
-            });
-        }
-
-        // --- FORM HANDLING ---
-        $('#personnel-form').on('submit', function(e) {
-            e.preventDefault();
-            
-            const requiredFields = ['fname', 'lname', 'phone', 'affiliation', 'rank'];
-            let isValid = true;
-            for (const field of requiredFields) {
-                const input = $(`#${field}`);
-                if (!input.val()) {
-                    isValid = false;
-                    input.addClass('border-red-500');
+                
+                if (this.rankOptions.includes(this.form.rank)) {
+                    this.selectedRankType = this.form.rank;
+                } else if (this.form.rank) {
+                    this.selectedRankType = 'อื่นๆ';
                 } else {
-                    input.removeClass('border-red-500');
+                    this.selectedRankType = this.rankOptions[0];
+                    this.form.rank = this.rankOptions[0];
                 }
-            }
-            if (!isValid) {
-                 Swal.fire('ข้อมูลไม่ครบถ้วน', 'กรุณากรอกข้อมูลในช่องที่จำเป็นให้ครบถ้วน (ชื่อ, สกุล, เบอร์โทร, สังกัด, ยศ)', 'warning');
-                 return;
-            }
 
-            const formData = {};
-            const formArray = $(this).serializeArray();
-            $.each(formArray, function(i, field) {
-                formData[field.name] = field.value;
-            });
-
-            // Handle 'อื่นๆ' for affiliation
-            if (formData.affiliation === 'อื่นๆ') {
-                formData.affiliation = $('#affiliation_other').val() || 'อื่นๆ';
-            }
-            // Handle 'อื่นๆ' for rank
-            if (formData.rank === 'อื่นๆ') {
-                formData.rank = $('#rank_other').val() || 'อื่นๆ';
-            }
-            
-            const file = $('#profile_pic')[0].files[0];
-            if(file){
-                 const reader = new FileReader();
-                 reader.onloadend = function() {
-                    formData.profile_pic_base64 = reader.result;
-                    formData.profile_pic_filename = file.name;
-                    handleSave(formData);
-                 }
-                 reader.readAsDataURL(file);
-            } else {
-                 // Keep existing image if not uploading a new one during update
-                 formData.profile_pic_base64 = selectedRowData ? selectedRowData.profile_pic_url : null;
-                 formData.profile_pic_filename = '';
-                 handleSave(formData);
-            }
-        });
-
-        function populateForm(data) {
-            // Populate all form fields from data object
-            for (const key in data) {
-                if (data.hasOwnProperty(key)) {
-                    const el = $(`#${key}`);
-                    if (el.length) {
-                        el.val(data[key]);
-                    }
+                if (this.corpsOptions.includes(this.form.corps)) {
+                    this.selectedCorpsType = this.form.corps;
+                } else if (this.form.corps) {
+                    this.selectedCorpsType = 'อื่นๆ';
+                } else {
+                    this.selectedCorpsType = ''; 
                 }
-            }
-            
-            // Handle 'อื่นๆ' for rank
-            const rankOptions = $('#rank option').map((i, el) => el.value).get();
-            if (rankOptions.includes(data.rank)) {
-                 $('#rank').val(data.rank).trigger('change');
-            } else {
-                 $('#rank').val('อื่นๆ').trigger('change');
-                 $('#rank_other').val(data.rank);
-            }
 
-            // Handle 'อื่นๆ' for affiliation
-            const affiliations = $('#affiliation option').map((i, el) => el.value).get();
-            if (affiliations.includes(data.affiliation)) {
-                 $('#affiliation').val(data.affiliation).trigger('change');
-            } else {
-                 $('#affiliation').val('อื่นๆ').trigger('change');
-                 $('#affiliation_other').val(data.affiliation);
-            }
-            
-            $('#image_preview').attr('src', data.profile_pic_url || 'https://placehold.co/200x200/e2e8f0/adb5bd?text=No+Image');
-            $('#save-btn').addClass('hidden');
-            $('#update-btn, #delete-btn').removeClass('hidden');
-            
-            showModal(); // Show modal after populating
-        }
+                this.showModal = true;
+            },
+            closeModal() {
+                this.showModal = false;
+            },
+            handleRankChange() {
+                if (this.selectedRankType !== 'อื่นๆ') {
+                    this.form.rank = this.selectedRankType;
+                } else {
+                    this.form.rank = ''; 
+                }
+            },
+            handleCorpsChange() {
+                if (this.selectedCorpsType !== 'อื่นๆ') {
+                    this.form.corps = this.selectedCorpsType;
+                } else {
+                    this.form.corps = ''; 
+                }
+            },
+            enforceNumericInput(event, field) {
+                let value = event.target.value;
+                value = value.replace(/\D/g, ''); 
+                
+                if (field === 'militaryId' || field === 'phone1' || field === 'phone2') {
+                    if (value.length > 10) value = value.slice(0, 10);
+                } else if (field === 'zipCode') {
+                    if (value.length > 5) value = value.slice(0, 5);
+                }
 
-        function clearForm() {
-            $('#personnel-form')[0].reset();
-            $('#recordId').val(''); // Clear the hidden ID
-            $('#image_preview').attr('src', 'https://placehold.co/200x200/e2e8f0/adb5bd?text=Preview');
-            $('#save-btn').removeClass('hidden');
-            $('#update-btn, #delete-btn').addClass('hidden');
-            $('#affiliation_other_wrapper').addClass('hidden');
-            $('#rank_other_wrapper').addClass('hidden');
-            if (dataTable) dataTable.$('tr.bg-blue-200').removeClass('bg-blue-200');
-            selectedRowData = null;
-            $('#create-doc-btn').prop('disabled', true);
-        }
-        
-        // --- EVENT LISTENERS ---
-        
-        // Modal Listeners
-        $('#add-new-btn').on('click', function() {
-            clearForm();
-            showModal();
-        });
-        $('#close-modal-btn').on('click', hideModal);
-        $('#form-modal-backdrop').on('click', hideModal);
+                this.form[field] = value;
+            },
+            handleSignatureUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                if (file.type !== 'image/png') {
+                    alert('กรุณาอัปโหลดไฟล์ .png เท่านั้น');
+                    event.target.value = ''; 
+                    return;
+                }
+                
+                if (file.size > 500 * 1024) { 
+                    alert('ไฟล์มีขนาดใหญ่เกินไป (จำกัด 500KB)');
+                    event.target.value = ''; 
+                    return;
+                }
 
-        $('#affiliation').on('change', function() {
-            if ($(this).val() === 'อื่นๆ') {
-                $('#affiliation_other_wrapper').removeClass('hidden');
-            } else {
-                $('#affiliation_other_wrapper').addClass('hidden');
-                $('#affiliation_other').val('');
-            }
-        });
-
-        $('#rank').on('change', function() {
-            if ($(this).val() === 'อื่นๆ') {
-                $('#rank_other_wrapper').removeClass('hidden');
-            } else {
-                $('#rank_other_wrapper').addClass('hidden');
-                $('#rank_other').val('');
-            }
-        });
-
-        $('#profile_pic').on('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                 if(file.size > 5 * 1024 * 1024) { // 5 MB limit
-                      Swal.fire('ขนาดไฟล์ใหญ่เกินไป', 'กรุณาเลือกรูปภาพขนาดไม่เกิน 5MB', 'warning');
-                      $(this).val('');
-                      return;
-                 }
                 const reader = new FileReader();
-                reader.onload = function(event) {
-                    $('#image_preview').attr('src', event.target.result);
-                }
+                reader.onload = (e) => {
+                    this.form.signatureUrl = e.target.result; 
+                };
+                reader.onerror = (error) => {
+                    console.error('Error reading file:', error);
+                    alert('เกิดข้อผิดพลาดในการอ่านไฟล์');
+                };
                 reader.readAsDataURL(file);
+            },
+            handlePhotoUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const allowedTypes = ['image/jpeg', 'image/png'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('กรุณาอัปโหลดไฟล์ .jpg หรือ .png เท่านั้น');
+                    event.target.value = ''; 
+                    return;
+                }
+                
+                if (file.size > 500 * 1024) { 
+                    alert('ไฟล์มีขนาดใหญ่เกินไป (จำกัด 500KB)');
+                    event.target.value = ''; 
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.form.photoUrl = e.target.result; 
+                };
+                reader.onerror = (error) => {
+                    console.error('Error reading file:', error);
+                    alert('เกิดข้อผิดพลาดในการอ่านไฟล์');
+                };
+                reader.readAsDataURL(file);
+            },
+            calculateRetirement() {
+                if (!this.form.birthDate) {
+                    this.form.retirementYear = '';
+                    return;
+                }
+                const dob = new Date(this.form.birthDate);
+                const birthYear = dob.getFullYear(); 
+                const birthMonth = dob.getMonth() + 1; 
+
+                let retireYearCE = birthYear + 60;
+                
+                if (birthMonth >= 10) {
+                    retireYearCE += 1;
+                }
+
+                const retireYearBE = retireYearCE + 543;
+                this.form.retirementYear = `พ.ศ. ${retireYearBE}`;
+            },
+            formatDate(dateStr) {
+                if(!dateStr) return '-';
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('th-TH', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                });
+            },
+            viewDetails(profile) {
+                this.form = { ...profile };
+                this.openModal('view');
+            },
+            editProfile(profile) {
+                this.form = { ...profile };
+                this.openModal('edit');
+            },
+            resetForm() {
+                this.form = JSON.parse(JSON.stringify(this.defaultForm));
+                this.form.rank = this.rankOptions[0];
+                this.selectedCorpsType = '';
+                this.form.signatureUrl = ''; 
+                this.form.photoUrl = ''; 
+            },
+            async submitForm() {
+                if (!this.user) return;
+                
+                if (this.selectedRankType === 'อื่นๆ' && !this.form.rank.trim()) {
+                    alert('กรุณาระบุยศ (อื่นๆ)');
+                    return;
+                }
+                if (this.selectedCorpsType === 'อื่นๆ' && !this.form.corps.trim()) {
+                    alert('กรุณาระบุเหล่า (อื่นๆ)');
+                    return;
+                }
+
+                const profileData = { ...this.form };
+                delete profileData.id; 
+
+                try {
+                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'crma42_profiles');
+
+                    if (this.modalMode === 'add') {
+                        await addDoc(colRef, profileData);
+                    } else if (this.modalMode === 'edit') {
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'crma42_profiles', this.form.id);
+                        await updateDoc(docRef, profileData);
+                    }
+                    this.closeModal();
+                } catch (e) {
+                    console.error("Error saving document: ", e);
+                    alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+                }
+            },
+            async confirmDelete() {
+                if (confirm('คุณแน่ใจหรือไม่ที่จะลบข้อมูลนี้?')) {
+                    try {
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'crma42_profiles', this.form.id);
+                        await deleteDoc(docRef);
+                        this.closeModal();
+                    } catch (e) {
+                        console.error("Error deleting document: ", e);
+                        alert("เกิดข้อผิดพลาดในการลบข้อมูล");
+                    }
+                }
+            },
+            printProfile() {
+                window.print();
+            },
+            exportWord() {
+                // Simple HTML to Word export logic
+                const printContent = document.getElementById('print-area').innerHTML;
+                
+                // Structure required for Word to interpret HTML correctly
+                const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' "+
+                    "xmlns:w='urn:schemas-microsoft-com:office:word' "+
+                    "xmlns='http://www.w3.org/TR/REC-html40'>"+
+                    "<head><meta charset='utf-8'><title>Export HTML to Word Document</title></head><body>";
+                const footer = "</body></html>";
+                
+                const sourceHTML = header + printContent + footer;
+                
+                const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+                const fileDownload = document.createElement("a");
+                document.body.appendChild(fileDownload);
+                fileDownload.href = source;
+                fileDownload.download = 'profile_' + this.form.militaryId + '.doc';
+                fileDownload.click();
+                document.body.removeChild(fileDownload);
             }
-        });
-
-        $('#clear-btn').on('click', clearForm);
-        
-        // Use submit button for updates now, handled by main form submit listener
-        $('#update-btn').on('click', () => $('#personnel-form').trigger('submit')); 
-        
-        $('#delete-btn').on('click', () => {
-            const id = $('#recordId').val();
-            if(id) handleDelete(id);
-        });
-
-        // --- SEARCH ---
-        $('#search-btn').on('click', function() {
-            const query = $('#name-search-input').val();
-            if (!query) {
-                Swal.fire('กรุณาป้อนคำค้นหา', 'กรุณาป้อนชื่อหรือสกุลที่ต้องการค้นหา', 'info');
-                return;
-            }
-            Swal.fire({
-                title: 'กำลังค้นหา...',
-                allowOutsideClick: false,
-                didOpen: () => { Swal.showLoading(); }
-            });
-            google.script.run
-                .withSuccessHandler(function(response) {
-                    Swal.close();
-                    console.log("Search response:", response); // เพิ่มการ log เพื่อตรวจสอบ
-                    if (response && response.success && response.data) {
-                        if (response.data.length === 0) {
-                            Swal.fire('ไม่พบข้อมูล', 'ไม่พบข้อมูลที่ตรงกับคำค้นหา', 'info');
-                        }
-                        // [FIX] แก้ไขวิธีการวาดตารางใหม่ให้ชัดเจนขึ้น
-                        dataTable.clear().rows.add(response.data).draw(false); // 'false' to maintain paging
-                        clearForm(); // Clear form after search
-                    } else {
-                         const errorMessage = response ? response.message : 'ไม่ได้รับการตอบกลับจากเซิร์ฟเวอร์';
-                        Swal.fire('ค้นหาล้มเหลว', errorMessage, 'error');
-                    }
-                })
-                .withFailureHandler(function(err) {
-                    Swal.close();
-                    Swal.fire('เกิดข้อผิดพลาด', 'เชื่อมต่อเซิร์ฟเวอร์ล้มเหลว', 'error');
-                })
-                .searchData(query);
-        });
-
-        $('#show-all-btn').on('click', function() {
-             $('#name-search-input').val(''); // Clear search input
-             // [FIX] เปลี่ยนเป็นการโหลดข้อมูลทั้งหมดจากเซิร์ฟเวอร์ใหม่เพื่อความแน่นอน
-             loadData(); 
-             clearForm();
-        });
-
-
-        // --- EXPORT & PRINT ---
-        $('#export-excel-btn').on('click', function() {
-            // Use DataTable's internal data (what's currently shown) after sorting to export
-            const dataToExport = dataTable.rows({ order: 'current' }).data().toArray();
-             if (dataToExport.length === 0) {
-                 Swal.fire('ไม่มีข้อมูล', 'ไม่พบข้อมูลสำหรับส่งออก (อาจต้องกด "แสดงทั้งหมด" ก่อน)', 'info');
-                 return;
-             }
-            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "PersonnelData");
-            XLSX.writeFile(workbook, "Personnel_Data.xlsx");
-        });
-
-        $('#print-pdf-btn').on('click', function() {
-             Swal.fire({
-                 title: 'กำลังเตรียมรายงาน...',
-                 text: 'กรุณารอสักครู่',
-                 allowOutsideClick: false,
-                 didOpen: () => { Swal.showLoading(); }
-             });
-
-            // Call a server-side function to get data with Base64 images
-            google.script.run
-                .withSuccessHandler(function(response) {
-                    if (!response || !response.success) {
-                        Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถดึงข้อมูลสำหรับพิมพ์ได้', 'error');
-                        return;
-                    }
-
-                    let content = 'ยังไม่มีข้อมูล';
-                    // Use the sorted data from the dataTable for printing
-                    const printableData = dataTable.rows({ order: 'current' }).data().toArray();
-                    
-                    // Create a map of ID -> base64 image from the server response
-                    const imageMap = response.data.reduce((map, item) => {
-                        map[item.id] = item.profile_pic_base64;
-                        return map;
-                    }, {});
-
-                    if (printableData && printableData.length > 0) {
-                        content = '<table class="w-full border-collapse border border-slate-500">';
-                        content += '<thead class="bg-slate-200"><tr>';
-                        const headers = ["รูปภาพ", "ID", "ยศ", "ชื่อ", "สกุล", "สังกัด", "ตำแหน่ง", "เบอร์โทร"];
-                        headers.forEach(h => content += `<th class="border border-slate-600 p-2">${h}</th>`);
-                        content += '</tr></thead><tbody>';
-
-                        printableData.forEach(p => {
-                            const imageUrl = imageMap[p.id] ? imageMap[p.id] : 'https://placehold.co/60x60/e2e8f0/adb5bd?text=N/A';
-                            content += '<tr>';
-                            content += `<td class="border border-slate-700 p-2 text-center align-middle"><img src="${imageUrl}" alt="Profile" style="width:60px; height:60px; object-fit:cover; border-radius:8px; margin:auto;"></td>`;
-                            content += `<td class="border border-slate-700 p-2 text-center align-middle">${p.id}</td>`;
-                            content += `<td class="border border-slate-700 p-2 align-middle">${p.rank}</td>`;
-                            content += `<td class="border border-slate-700 p-2 align-middle">${p.fname}</td>`;
-                            content += `<td class="border border-slate-700 p-2 align-middle">${p.lname}</td>`;
-                            content += `<td class="border border-slate-700 p-2 align-middle">${p.affiliation}</td>`;
-                            content += `<td class="border border-slate-700 p-2 align-middle">${p.position}</td>`;
-                            content += `<td class="border border-slate-700 p-2 align-middle">${p.phone}</td>`;
-                            content += '</tr>';
-                        });
-                        content += '</tbody></table>';
-                    }
-                    
-                    $('#printable-content').html(content);
-                    
-                    Swal.close();
-                    
-                    // Use a short timeout to let the browser render the base64 images
-                    setTimeout(() => {
-                        window.print();
-                    }, 500);
-
-                })
-                .withFailureHandler(function(err) {
-                    Swal.fire('เกิดข้อผิดพลาด', 'การเชื่อมต่อกับเซิร์ฟเวอร์ล้มเหลวขณะเตรียมพิมพ์', 'error');
-                })
-                .getDataForPrinting(); // This is a new server-side function you need to create
-        });
-        
-        $('#create-doc-btn').on('click', function() {
-             if (!selectedRowData) {
-                 Swal.fire('เกิดข้อผิดพลาด', 'กรุณาเลือกบุคลากรจากตารางก่อน', 'warning');
-                 return;
-             }
-             Swal.fire({
-                 title: 'กำลังสร้างเอกสาร Google Doc...',
-                 allowOutsideClick: false,
-                 didOpen: () => { Swal.showLoading(); }
-             });
-             
-            google.script.run
-                .withSuccessHandler(function(response) {
-                    if(response && response.success){
-                        Swal.fire({
-                            title: 'สร้างเอกสารสำเร็จ!',
-                            html: `คุณสามารถเปิดเอกสารได้ที่: <a href="${response.url}" target="_blank" class="text-blue-600 hover:underline">คลิกที่นี่</a>`,
-                            icon: 'success'
-                        });
-                    } else {
-                         const errorMessage = response ? response.message : 'ไม่ได้รับการตอบกลับจากเซิร์ฟเวอร์';
-                        Swal.fire('เกิดข้อผิดพลาด!', `ไม่สามารถสร้างเอกสารได้: ${errorMessage}`, 'error');
-                    }
-                })
-                .withFailureHandler(function(error){
-                    Swal.fire('เกิดข้อผิดพลาด!', 'การเชื่อมต่อกับเซิร์ฟเวอร์ล้มเหลว', 'error');
-                })
-                .createGoogleDoc(selectedRowData);
-        });
-
-        // --- INITIAL LOAD ---
-        loadData();
-    });
-    </script>
+        }
+    }).mount('#app');
+</script>
 </body>
 </html>
+
+
